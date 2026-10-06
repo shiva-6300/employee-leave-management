@@ -38,7 +38,6 @@ class LeaveRequest(db.Model):
 
     user = db.relationship("User", back_populates="leave_requests")
 
-    # ------------------------------------------------------------------ helpers
     @staticmethod
     def calculate_days(start, end):
         """Number of working days (Mon-Fri) between start and end, inclusive."""

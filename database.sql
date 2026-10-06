@@ -1,7 +1,4 @@
--- ============================================================
--- Employee Leave Management System - MySQL schema + sample data
--- Usage:  mysql -u root -p < database.sql
--- ============================================================
+
 
 CREATE DATABASE IF NOT EXISTS leave_management
     CHARACTER SET utf8mb4
@@ -13,9 +10,7 @@ DROP TABLE IF EXISTS leave_requests;
 DROP TABLE IF EXISTS leave_balances;
 DROP TABLE IF EXISTS users;
 
--- ------------------------------------------------------------
--- users
--- ------------------------------------------------------------
+
 CREATE TABLE users (
     id          INT            NOT NULL AUTO_INCREMENT,
     name        VARCHAR(100)   NOT NULL,
@@ -27,9 +22,7 @@ CREATE TABLE users (
     UNIQUE KEY uq_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------
--- leave_balances (one row per user)
--- ------------------------------------------------------------
+
 CREATE TABLE leave_balances (
     id            INT NOT NULL AUTO_INCREMENT,
     user_id       INT NOT NULL,
@@ -42,9 +35,6 @@ CREATE TABLE leave_balances (
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------
--- leave_requests
--- ------------------------------------------------------------
 CREATE TABLE leave_requests (
     id                INT  NOT NULL AUTO_INCREMENT,
     user_id           INT  NOT NULL,
@@ -63,13 +53,7 @@ CREATE TABLE leave_requests (
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------------------
--- Sample data
---   Manager : manager@company.com   / Manager@123
---   Employee: employee@company.com  / Employee@123
---   Others  : anita@company.com, rahul@company.com / Employee@123
--- Passwords below are Werkzeug hashes (never plain text).
--- ------------------------------------------------------------
+
 INSERT INTO users (id, name, email, password, role) VALUES
 (1, 'Priya Sharma', 'manager@company.com',  'scrypt:32768:8:1$z6sEkSi9H2WMZi2v$cd66d3b087b4ce813c05dcbe65ad5b394260c516ab49535d2cb666044139745a38212c0133ad07980713873e4cd2dbe3da23fd6ed0dd91bda310193e512e7dfa',  'manager'),
 (2, 'John Doe',     'employee@company.com', 'scrypt:32768:8:1$ytrGRKDg3MGoOSPc$a67f03583f21bb77514c090be0141499623dabad2677c6bad4ab008916cb00a634426108e1a471c73f36eb5042c8380c41e52cbb91d4dbe32ec752cddd111bb5', 'employee'),

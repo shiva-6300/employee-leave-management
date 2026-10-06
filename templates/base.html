@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} | Leave Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% if current_user %}
+<header class="navbar">
+    <div class="navbar-inner">
+        <a class="brand" href="{{ url_for('auth.index') }}">Leave<span>Manager</span></a>
+        <nav class="nav-links">
+            {% if current_user.role == 'manager' %}
+                <a href="{{ url_for('manager.dashboard') }}">Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('employee.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('employee.apply_leave') }}">Apply Leave</a>
+                <a href="{{ url_for('employee.leave_history') }}">Leave History</a>
+            {% endif %}
+        </nav>
+        <div class="nav-user">
+            <span class="user-name">{{ current_user.name }} <small>({{ current_user.role|capitalize }})</small></span>
+            <form method="post" action="{{ url_for('auth.logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-outline btn-sm">Logout</button>
+            </form>
+        </div>
+    </div>
+</header>
+{% endif %}
+
+<main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-area">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">Employee Leave Management System</footer>
+</body>
+</html>

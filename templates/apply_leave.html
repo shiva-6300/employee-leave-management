@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Apply for Leave{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Apply for Leave</h1>
+    <a class="btn btn-outline" href="{{ url_for('employee.dashboard') }}">&larr; Back</a>
+</div>
+
+<div class="grid grid-3">
+    {% for card in cards %}
+    <div class="card stat-card stat-{{ card.type|lower }}">
+        <div class="stat-label">{{ card.type }} Leave</div>
+        <div class="stat-value">{{ card.balance }}</div>
+        <div class="stat-note">days remaining{% if card.pending %} &middot; {{ card.pending }} reserved{% endif %}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card form-card">
+    <form method="post" action="{{ url_for('employee.apply_leave') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <div class="form-group">
+            <label for="leave_type">Leave Type</label>
+            <select id="leave_type" name="leave_type" required>
+                <option value="">-- Select leave type --</option>
+                {% for t in leave_types %}
+                <option value="{{ t }}" {% if form.leave_type == t %}selected{% endif %}>{{ t }} Leave</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" id="start_date" name="start_date" value="{{ form.start_date }}" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" id="end_date" name="end_date" value="{{ form.end_date }}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="reason">Reason</label>
+            <textarea id="reason" name="reason" rows="4" minlength="5" maxlength="500"
+                      placeholder="Briefly explain the reason for your leave" required>{{ form.reason }}</textarea>
+        </div>
+
+        <p class="muted small">Leave days are calculated automatically and count working days
+            (Monday to Friday) between the start and end dates, inclusive.
+            Requests that overlap an existing pending or approved leave are not allowed.</p>
+
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+    </form>
+</div>
+{% endblock %}

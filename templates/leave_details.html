@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Leave Request #{{ leave.id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Leave Request #{{ leave.id }}</h1>
+    {% if can_review %}
+    <a class="btn btn-outline" href="{{ url_for('manager.dashboard') }}">&larr; Back to dashboard</a>
+    {% else %}
+    <a class="btn btn-outline" href="{{ url_for('employee.leave_history') }}">&larr; Back to history</a>
+    {% endif %}
+</div>
+
+<div class="card details-card">
+    <dl class="details">
+        <div><dt>Employee</dt><dd>{{ leave.user.name }} ({{ leave.user.email }})</dd></div>
+        <div><dt>Leave Type</dt><dd>{{ leave.leave_type }}</dd></div>
+        <div><dt>Status</dt><dd><span class="badge badge-{{ leave.status|lower }}">{{ leave.status }}</span></dd></div>
+        <div><dt>Start Date</dt><dd>{{ leave.start_date|fmt_date }}</dd></div>
+        <div><dt>End Date</dt><dd>{{ leave.end_date|fmt_date }}</dd></div>
+        <div><dt>Working Days</dt><dd>{{ leave.days }}</dd></div>
+        <div><dt>Applied On</dt><dd>{{ leave.applied_at|fmt_datetime }}</dd></div>
+        <div><dt>Last Updated</dt><dd>{{ leave.updated_at|fmt_datetime }}</dd></div>
+        <div class="full"><dt>Reason</dt><dd class="pre">{{ leave.reason }}</dd></div>
+        {% if leave.status == 'Rejected' %}
+        <div class="full"><dt>Rejection Reason</dt><dd class="pre rejection">{{ leave.rejection_reason }}</dd></div>
+        {% endif %}
+    </dl>
+</div>
+
+{% if can_review and leave.status == 'Pending' %}
+<div class="grid grid-2">
+    <div class="card form-card">
+        <h2 class="section-title">Approve</h2>
+        <p class="muted">{{ leave.days }} day(s) of {{ leave.leave_type }} leave will be deducted from the employee's balance
+            (currently {{ leave.user.balance.get(leave.leave_type) if leave.user.balance else 0 }} day(s)).</p>
+        <form method="post" action="{{ url_for('manager.approve_leave', leave_id=leave.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="from" value="details">
+            <button type="submit" class="btn btn-success">Approve Leave</button>
+        </form>
+    </div>
+    <div class="card form-card" id="reject">
+        <h2 class="section-title">Reject</h2>
+        <form method="post" action="{{ url_for('manager.reject_leave', leave_id=leave.id) }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="from" value="details">
+            <div class="form-group">
+                <label for="rejection_reason">Rejection Reason</label>
+                <textarea id="rejection_reason" name="rejection_reason" rows="3" minlength="5" maxlength="300"
+                          placeholder="Explain why this request is being rejected" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger">Reject Leave</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

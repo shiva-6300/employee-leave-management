@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Leave History{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>My Leave History</h1>
+    <a class="btn btn-primary" href="{{ url_for('employee.apply_leave') }}">+ Apply for Leave</a>
+</div>
+
+<form method="get" class="filter-bar" action="{{ url_for('employee.leave_history') }}">
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if selected_status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+    <noscript><button type="submit" class="btn btn-outline btn-sm">Filter</button></noscript>
+</form>
+
+<div class="card table-card">
+    {% if leaves %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Applied On</th><th>Rejection Reason</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for leave in leaves %}
+                <tr>
+                    <td>{{ leave.id }}</td>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date|fmt_date }}</td>
+                    <td>{{ leave.end_date|fmt_date }}</td>
+                    <td>{{ leave.days }}</td>
+                    <td><span class="badge badge-{{ leave.status|lower }}">{{ leave.status }}</span></td>
+                    <td>{{ leave.applied_at|fmt_datetime }}</td>
+                    <td>{{ leave.rejection_reason or '-' }}</td>
+                    <td><a href="{{ url_for('employee.leave_details', leave_id=leave.id) }}">Details</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">No leave requests found.</p>
+    {% endif %}
+</div>
+{% endblock %}

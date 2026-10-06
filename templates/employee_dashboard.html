@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Employee Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Welcome, {{ current_user.name }}</h1>
+    <a class="btn btn-primary" href="{{ url_for('employee.apply_leave') }}">+ Apply for Leave</a>
+</div>
+
+<h2 class="section-title">Leave Balance</h2>
+<div class="grid grid-3">
+    {% for card in cards %}
+    <div class="card stat-card stat-{{ card.type|lower }}">
+        <div class="stat-label">{{ card.type }} Leave</div>
+        <div class="stat-value">{{ card.balance }}</div>
+        <div class="stat-note">days remaining{% if card.pending %} &middot; {{ card.pending }} reserved (pending){% endif %}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<h2 class="section-title">Request Summary</h2>
+<div class="grid grid-3">
+    <div class="card stat-card"><div class="stat-label">Pending</div><div class="stat-value">{{ stats['Pending'] }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Approved</div><div class="stat-value">{{ stats['Approved'] }}</div></div>
+    <div class="card stat-card"><div class="stat-label">Rejected</div><div class="stat-value">{{ stats['Rejected'] }}</div></div>
+</div>
+
+<div class="section-head">
+    <h2 class="section-title">Recent Requests</h2>
+    <a href="{{ url_for('employee.leave_history') }}">View all &rarr;</a>
+</div>
+<div class="card table-card">
+    {% if recent %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for leave in recent %}
+                <tr>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date|fmt_date }}</td>
+                    <td>{{ leave.end_date|fmt_date }}</td>
+                    <td>{{ leave.days }}</td>
+                    <td><span class="badge badge-{{ leave.status|lower }}">{{ leave.status }}</span></td>
+                    <td><a href="{{ url_for('employee.leave_details', leave_id=leave.id) }}">Details</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">You have not applied for any leave yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

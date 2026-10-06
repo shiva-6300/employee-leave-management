@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="login-wrapper">
+    <div class="card login-card">
+        <h1 class="login-title">Leave<span>Manager</span></h1>
+        <p class="muted center">Sign in to manage your leave</p>
+
+        <form method="post" action="{{ url_for('auth.login') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ email }}" maxlength="120"
+                       placeholder="you@company.com" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <div class="demo-box">
+            <strong>Demo accounts</strong>
+            <p>Manager: manager@company.com / Manager@123</p>
+            <p>Employee: employee@company.com / Employee@123</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

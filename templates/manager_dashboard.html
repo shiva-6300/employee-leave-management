@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Manager Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Manager Dashboard</h1>
+</div>
+
+<div class="grid grid-4">
+    <div class="card stat-card"><div class="stat-label">Employees</div><div class="stat-value">{{ stats.employees }}</div></div>
+    <div class="card stat-card stat-pending"><div class="stat-label">Pending Requests</div><div class="stat-value">{{ stats.pending }}</div></div>
+    <div class="card stat-card stat-approved"><div class="stat-label">Approved</div><div class="stat-value">{{ stats.approved }}</div></div>
+    <div class="card stat-card stat-rejected"><div class="stat-label">Rejected</div><div class="stat-value">{{ stats.rejected }}</div></div>
+</div>
+
+<h2 class="section-title" id="pending">Pending Requests</h2>
+<div class="card table-card">
+    {% if pending %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Applied On</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+            {% for leave in pending %}
+                <tr>
+                    <td>{{ leave.id }}</td>
+                    <td>{{ leave.user.name }}</td>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date|fmt_date }}</td>
+                    <td>{{ leave.end_date|fmt_date }}</td>
+                    <td>{{ leave.days }}</td>
+                    <td>{{ leave.applied_at|fmt_datetime }}</td>
+                    <td class="actions">
+                        <form method="post" action="{{ url_for('manager.approve_leave', leave_id=leave.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                        <a class="btn btn-danger btn-sm" href="{{ url_for('manager.leave_details', leave_id=leave.id) }}#reject">Reject</a>
+                        <a class="btn btn-outline btn-sm" href="{{ url_for('manager.leave_details', leave_id=leave.id) }}">View</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">No pending requests. You're all caught up!</p>
+    {% endif %}
+</div>
+
+<h2 class="section-title" id="employees">All Employees</h2>
+<div class="card table-card">
+    {% if employees %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Name</th><th>Email</th><th>Casual</th><th>Sick</th><th>Earned</th><th>Joined</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for emp in employees %}
+                <tr>
+                    <td>{{ emp.id }}</td>
+                    <td>{{ emp.name }}</td>
+                    <td>{{ emp.email }}</td>
+                    <td>{{ emp.balance.casual_leave if emp.balance else '-' }}</td>
+                    <td>{{ emp.balance.sick_leave if emp.balance else '-' }}</td>
+                    <td>{{ emp.balance.earned_leave if emp.balance else '-' }}</td>
+                    <td>{{ emp.created_at|fmt_date }}</td>
+                    <td><a href="{{ url_for('manager.dashboard', employee=emp.id) }}#history">View history</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">No employees found.</p>
+    {% endif %}
+</div>
+
+<h2 class="section-title" id="history">Leave Requests &amp; History</h2>
+<form method="get" class="filter-bar" action="{{ url_for('manager.dashboard') }}#history">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+        <option value="">All</option>
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if selected_status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+    <label for="employee">Employee</label>
+    <select id="employee" name="employee">
+        <option value="">All</option>
+        {% for emp in employees %}
+        <option value="{{ emp.id }}" {% if selected_employee == emp.id %}selected{% endif %}>{{ emp.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('manager.dashboard') }}#history">Reset</a>
+</form>
+<div class="card table-card">
+    {% if all_requests %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Updated</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for leave in all_requests %}
+                <tr>
+                    <td>{{ leave.id }}</td>
+                    <td>{{ leave.user.name }}</td>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date|fmt_date }}</td>
+                    <td>{{ leave.end_date|fmt_date }}</td>
+                    <td>{{ leave.days }}</td>
+                    <td><span class="badge badge-{{ leave.status|lower }}">{{ leave.status }}</span></td>
+                    <td>{{ leave.updated_at|fmt_datetime }}</td>
+                    <td><a href="{{ url_for('manager.leave_details', leave_id=leave.id) }}">Details</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">No leave requests match the selected filters.</p>
+    {% endif %}
+</div>
+{% endblock %}
